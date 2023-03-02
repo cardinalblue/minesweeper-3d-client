@@ -15,19 +15,18 @@ type CachedObjectMap = {
 type Props = {
   players: PlayerAgg[];
   game: GameAgg;
-  myPlayerPosition: PositionVo;
 };
 
 const CHARACTER_MODEL_SRC = '/characters/robot.gltf';
 const BASE_MODEL_SRC = '/bases/grass.gltf';
-const CAMERA_HEIGHT = 20;
-const CAMERA_Z_OFFSET = 20;
+const CAMERA_HEIGHT = 30;
+const CAMERA_Z_OFFSET = 40;
 const DIR_LIGHT_HEIGHT = 20;
 const DIR_LIGHT_Z_OFFSET = 20;
 const HEMI_LIGHT_HEIGHT = 20;
 
-function GameCanvas({ players, game, myPlayerPosition }: Props) {
-  console.log(game);
+function GameCanvas({ players, game }: Props) {
+  console.log(game, players);
 
   const wrapperRef = useRef<HTMLDivElement>(null);
   const wrapperDomRect = useDomRect(wrapperRef);
@@ -39,7 +38,7 @@ function GameCanvas({ players, game, myPlayerPosition }: Props) {
     hemiLight.position.set(0, HEMI_LIGHT_HEIGHT, 0);
     newScene.add(hemiLight);
 
-    const grid = new THREE.GridHelper(1000, 1000, 0x000000, 0x000000);
+    const grid = new THREE.GridHelper(game.getSize().getWidth(), game.getSize().getHeight(), 0x000000, 0x000000);
     // @ts-ignore
     grid.material.opacity = 0.2;
     // @ts-ignore
@@ -67,6 +66,8 @@ function GameCanvas({ players, game, myPlayerPosition }: Props) {
   });
   const [camera] = useState<THREE.PerspectiveCamera>(() => {
     const newCamera = new THREE.PerspectiveCamera(40, 1, 0.1, 1000);
+    newCamera.position.set(0, CAMERA_HEIGHT, CAMERA_Z_OFFSET);
+    newCamera.lookAt(0, 0, -10);
     scene.add(newCamera);
     return newCamera;
   });
@@ -83,7 +84,7 @@ function GameCanvas({ players, game, myPlayerPosition }: Props) {
   useEffect(() => {
     loadModel(CHARACTER_MODEL_SRC);
     loadModel(BASE_MODEL_SRC);
-  }, [players]);
+  }, []);
 
   useEffect(
     function putRendererOnWrapperRefReady() {
@@ -108,20 +109,6 @@ function GameCanvas({ players, game, myPlayerPosition }: Props) {
   );
 
   useEffect(
-    function updateCameraAndDirLightOnPositionChange() {
-      const myPlayerPositionX = myPlayerPosition.getX();
-      const myPlayerPositionZ = myPlayerPosition.getZ();
-
-      camera.position.set(myPlayerPositionX, CAMERA_HEIGHT, myPlayerPositionZ + CAMERA_Z_OFFSET);
-      camera.lookAt(myPlayerPositionX, 0, myPlayerPositionZ);
-
-      dirLight.position.set(myPlayerPositionX, DIR_LIGHT_HEIGHT, myPlayerPositionZ + DIR_LIGHT_Z_OFFSET);
-      dirLight.target.position.set(myPlayerPositionX, 0, myPlayerPositionZ);
-    },
-    [myPlayerPosition]
-  );
-
-  useEffect(
     function updateCameraAspectOnWrapperDomRectChange() {
       if (!wrapperDomRect) {
         return;
@@ -139,10 +126,10 @@ function GameCanvas({ players, game, myPlayerPosition }: Props) {
 
       enableShadowOnObject(grassObject);
       grassObject.position.set(0, -0.15, 0);
-      grassObject.scale.set(1000, 1, 1000);
+      grassObject.scale.set(game.getSize().getWidth(), 1, game.getSize().getHeight());
       scene.add(grassObject);
     },
-    [scene, cloneModel]
+    [scene, cloneModel, game]
   );
 
   useEffect(

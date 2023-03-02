@@ -23,8 +23,8 @@ const Room: NextPage = function Room() {
       className="w-screen h-screen flex"
       style={{ width: styleContext.windowWidth, height: styleContext.windowHeight }}
     >
-      {myPlayer && players && game && (
-        <GameCanvas game={game} players={players} myPlayerPosition={myPlayer.getPosition()} />
+      {game && (
+        <GameCanvas game={game} players={players || []} />
       )}
     </main>
   );
