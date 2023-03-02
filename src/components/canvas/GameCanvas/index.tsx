@@ -14,8 +14,8 @@ type CachedObjectMap = {
 
 type Props = {
   players: PlayerAgg[];
+  myPlayer: PlayerAgg;
   game: GameAgg;
-  cameraCase: number;
 };
 
 const getMineCountModelSrc = (mineCount: number) => `/mine_count/${mineCount}.gltf`;
@@ -31,9 +31,14 @@ const DIR_LIGHT_HEIGHT = 30;
 const DIR_LIGHT_Z_OFFSET = 50;
 const HEMI_LIGHT_HEIGHT = 20;
 
-function GameCanvas({ players, game, cameraCase }: Props) {
+function GameCanvas({ players, myPlayer, game }: Props) {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const wrapperDomRect = useDomRect(wrapperRef);
+  const myPlayerPos = myPlayer.getPosition();
+  const boardOffset: [x: number, z: number] = useMemo(
+    () => [-Math.floor(game.getSize().getWidth() / 2), -Math.floor(game.getSize().getHeight() / 2)],
+    [game.getSize().getWidth(), game.getSize().getHeight()]
+  );
   const [scene] = useState<THREE.Scene>(() => {
     const newScene = new THREE.Scene();
     newScene.background = new THREE.Color(0xffffff);
@@ -69,7 +74,7 @@ function GameCanvas({ players, game, cameraCase }: Props) {
     return newDirLight;
   });
   const [camera] = useState<THREE.PerspectiveCamera>(() => {
-    const newCamera = new THREE.PerspectiveCamera(50, 1, 0.1, 1000);
+    const newCamera = new THREE.PerspectiveCamera(60, 1, 0.1, 1000);
     scene.add(newCamera);
     return newCamera;
   });
@@ -82,11 +87,6 @@ function GameCanvas({ players, game, cameraCase }: Props) {
   });
   const { loadModel, cloneModel } = useContext(ThreeJsContext);
   const cachedPlayerObjects = useRef<CachedObjectMap>({});
-
-  const posOffset: [x: number, z: number] = useMemo(
-    () => [-Math.floor(game.getSize().getWidth() / 2), -Math.floor(game.getSize().getHeight() / 2)],
-    [game.getSize().getWidth(), game.getSize().getHeight()]
-  );
 
   useEffect(() => {
     loadModel(CHARACTER_MODEL_SRC);
@@ -134,31 +134,57 @@ function GameCanvas({ players, game, cameraCase }: Props) {
 
   useEffect(
     function updateCameraPositionOnGameSizeChange() {
-      const gameSize = game.getSize();
-      switch (cameraCase) {
+      const [boardOffsetX, boardOffsetZ] = boardOffset;
+      const [myPlayerPosX, myPlayerPosZ] = [myPlayerPos.getX(), myPlayerPos.getZ()];
+      switch (game.getCamera()) {
         case 0:
           camera.position.set(0, 40, 0);
+          camera.lookAt(0, 0, 0);
           break;
         case 1:
-          camera.position.set(0, 20, gameSize.getHeight());
+          camera.position.set(boardOffsetX + myPlayerPosX, 20, boardOffsetZ + myPlayerPosZ + 10);
+          camera.lookAt(boardOffsetX + myPlayerPosX, 0, boardOffsetZ + myPlayerPosZ);
           break;
         case 2:
-          camera.position.set(0, 40, gameSize.getHeight() * 6 + 10);
+          camera.position.set(boardOffsetX + myPlayerPosX, 10, boardOffsetZ + myPlayerPosZ + 5);
+          camera.lookAt(boardOffsetX + myPlayerPosX, 0, boardOffsetZ + myPlayerPosZ);
           break;
         case 3:
-          camera.position.set(0, 3, gameSize.getHeight() * 1.5);
+          camera.position.set(boardOffsetX + myPlayerPosX, 60, boardOffsetZ + myPlayerPosZ + 120);
+          camera.lookAt(boardOffsetX + myPlayerPosX, 0, boardOffsetZ + myPlayerPosZ);
+          break;
+        case 4:
+          switch (myPlayer.getDirection().toNumber()) {
+            case 0:
+              camera.position.set(boardOffsetX + myPlayerPosX, 1, boardOffsetZ + myPlayerPosZ);
+              camera.lookAt(boardOffsetX + myPlayerPosX, 1, boardOffsetZ + myPlayerPosZ - 1);
+              break;
+            case 1:
+              camera.position.set(boardOffsetX + myPlayerPosX, 1, boardOffsetZ + myPlayerPosZ);
+              camera.lookAt(boardOffsetX + myPlayerPosX + 1, 1, boardOffsetZ + myPlayerPosZ);
+              break;
+            case 2:
+              camera.position.set(boardOffsetX + myPlayerPosX, 1, boardOffsetZ + myPlayerPosZ);
+              camera.lookAt(boardOffsetX + myPlayerPosX, 1, boardOffsetZ + myPlayerPosZ + 1);
+              break;
+            case 3:
+              camera.position.set(boardOffsetX + myPlayerPosX, 1, boardOffsetZ + myPlayerPosZ);
+              camera.lookAt(boardOffsetX + myPlayerPosX - 1, 1, boardOffsetZ + myPlayerPosZ);
+              break;
+            default:
+              break;
+          }
           break;
         default:
           break;
       }
-      camera.lookAt(0, 0, 0);
     },
-    [camera, cameraCase, game]
+    [camera, game, myPlayerPos, boardOffset]
   );
 
   useEffect(
     function updateOnGameChange() {
-      const [posOffsetX, posOffsetZ] = posOffset;
+      const [boardOffsetX, boardOffsetZ] = boardOffset;
       const mountObjs: THREE.Group[] = [];
       const flagObjs: THREE.Group[] = [];
       const mineObjs: THREE.Group[] = [];
@@ -168,7 +194,7 @@ function GameCanvas({ players, game, cameraCase }: Props) {
           const mountObject = cloneModel(MOUND_MODEL_SRC);
           if (mountObject) {
             enableShadowOnObject(mountObject);
-            mountObject.position.set(posOffsetX + pos.getX(), 0, posOffsetZ + pos.getZ());
+            mountObject.position.set(boardOffsetX + pos.getX(), 0, boardOffsetZ + pos.getZ());
             scene.add(mountObject);
             mountObjs.push(mountObject);
           }
@@ -176,7 +202,7 @@ function GameCanvas({ players, game, cameraCase }: Props) {
           const flagObject = cloneModel(FLAG_MODEL_SRC);
           if (flagObject && area.getFlagged()) {
             enableShadowOnObject(flagObject);
-            flagObject.position.set(posOffsetX + pos.getX(), MOUNT_MODEL_HEIGHT, posOffsetZ + pos.getZ());
+            flagObject.position.set(boardOffsetX + pos.getX(), MOUNT_MODEL_HEIGHT, boardOffsetZ + pos.getZ());
             scene.add(flagObject);
             flagObjs.push(flagObject);
           }
@@ -184,7 +210,7 @@ function GameCanvas({ players, game, cameraCase }: Props) {
           const mineObject = cloneModel(MINE_MODEL_SRC);
           if (mineObject) {
             enableShadowOnObject(mineObject);
-            mineObject.position.set(posOffsetX + pos.getX(), 0, posOffsetZ + pos.getZ());
+            mineObject.position.set(boardOffsetX + pos.getX(), 0, boardOffsetZ + pos.getZ());
             scene.add(mineObject);
             mineObjs.push(mineObject);
           }
@@ -192,7 +218,7 @@ function GameCanvas({ players, game, cameraCase }: Props) {
           const mineCountObject = cloneModel(getMineCountModelSrc(area.getAdjMinesCount()));
           if (mineCountObject) {
             enableShadowOnObject(mineCountObject);
-            mineCountObject.position.set(posOffsetX + pos.getX(), 0, posOffsetZ + pos.getZ());
+            mineCountObject.position.set(boardOffsetX + pos.getX(), 0, boardOffsetZ + pos.getZ());
             scene.add(mineCountObject);
             mineCountObjs.push(mineCountObject);
           }
@@ -214,7 +240,7 @@ function GameCanvas({ players, game, cameraCase }: Props) {
         });
       };
     },
-    [scene, cloneModel, game, posOffset]
+    [scene, cloneModel, game, boardOffset]
   );
 
   useEffect(
@@ -260,7 +286,7 @@ function GameCanvas({ players, game, cameraCase }: Props) {
   useEffect(
     function handlePlayersUpdated() {
       players.forEach((player) => {
-        const [posOffsetX, posOffsetZ] = posOffset;
+        const [boardOffsetX, boardOffsetZ] = boardOffset;
 
         let playerObject: THREE.Group | null;
         const cachedPlayerOject = cachedPlayerObjects.current[player.getId()];
@@ -284,9 +310,9 @@ function GameCanvas({ players, game, cameraCase }: Props) {
             zPos = areaStood.getRevealed() ? 0 : MOUNT_MODEL_HEIGHT;
           }
           playerObject.position.set(
-            posOffsetX + player.getPosition().getX(),
+            boardOffsetX + player.getPosition().getX(),
             zPos,
-            posOffsetZ + player.getPosition().getZ()
+            boardOffsetZ + player.getPosition().getZ()
           );
           playerObject.rotation.y = Math.PI - (player.getDirection().toNumber() * Math.PI) / 2;
         }
@@ -300,7 +326,7 @@ function GameCanvas({ players, game, cameraCase }: Props) {
         }
       });
     },
-    [scene, cloneModel, posOffset, players, game]
+    [scene, cloneModel, boardOffset, players, game]
   );
 
   useEffect(

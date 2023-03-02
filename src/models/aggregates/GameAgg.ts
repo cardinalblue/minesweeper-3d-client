@@ -9,15 +9,18 @@ export default class GameAgg {
 
   private areas: AreaVo[][];
 
-  constructor(id: string, size: SizeVo, minesCount: number, areas: AreaVo[][]) {
+  private camera: 0 | 1 | 2 | 3 | 4;
+
+  constructor(id: string, size: SizeVo, minesCount: number, areas: AreaVo[][], camera: 0 | 1 | 2 | 3 | 4) {
     this.id = id;
     this.size = size;
     this.minesCount = minesCount;
     this.areas = areas;
+    this.camera = camera;
   }
 
-  static new(id: string, size: SizeVo, minesCount: number, areas: AreaVo[][]): GameAgg {
-    return new GameAgg(id, size, minesCount, areas);
+  static new(id: string, size: SizeVo, minesCount: number, areas: AreaVo[][], camera: 0 | 1 | 2 | 3 | 4): GameAgg {
+    return new GameAgg(id, size, minesCount, areas, camera);
   }
 
   public getId() {
@@ -30,6 +33,10 @@ export default class GameAgg {
 
   public getMinesCount() {
     return this.minesCount;
+  }
+
+  public getCamera() {
+    return this.camera;
   }
 
   public getArea(pos: PositionVo): AreaVo {

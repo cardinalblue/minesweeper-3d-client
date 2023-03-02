@@ -9,6 +9,7 @@ type GameAggDto = {
   size: SizeVoDto;
   minesCount: number;
   areas: AreaVoDto[][];
+  camera: 0 | 1 | 2 | 3 | 4;
 };
 
 export function parseGameAggDto(dto: GameAggDto): GameAgg {
@@ -18,7 +19,8 @@ export function parseGameAggDto(dto: GameAggDto): GameAgg {
     dto.minesCount,
     mapMatrix(dto.areas, (areaDto) =>
       AreaVo.new(areaDto.revealed, areaDto.flagged, areaDto.hasMine, areaDto.adjMinesCount)
-    )
+    ),
+    dto.camera
   );
 }
 

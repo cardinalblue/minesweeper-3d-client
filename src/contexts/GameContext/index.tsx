@@ -13,7 +13,9 @@ type ContextValue = {
   joinGame: (gameId: string) => void;
   movePlayer: (direction: DirectionVo) => void;
   flagArea: () => void;
+  changeCamera: () => void;
   leaveGame: () => void;
+  resetGame: () => void;
 };
 
 function createInitialContextValue(): ContextValue {
@@ -25,7 +27,9 @@ function createInitialContextValue(): ContextValue {
     joinGame: () => {},
     movePlayer: () => {},
     flagArea: () => {},
+    changeCamera: () => {},
     leaveGame: () => {},
+    resetGame: () => {},
   };
 }
 
@@ -108,6 +112,14 @@ export function Provider({ children }: Props) {
     gameSocket?.flagArea();
   }, [gameSocket]);
 
+  const changeCamera = useCallback(() => {
+    gameSocket?.changeCamera();
+  }, [gameSocket]);
+
+  const resetGame = useCallback(() => {
+    gameSocket?.resetGame();
+  }, [gameSocket]);
+
   return (
     <Context.Provider
       value={useMemo<ContextValue>(
@@ -120,8 +132,10 @@ export function Provider({ children }: Props) {
           movePlayer,
           leaveGame,
           flagArea,
+          changeCamera,
+          resetGame,
         }),
-        [gameStatus, myPlayer, players, game, joinGame, movePlayer, leaveGame]
+        [gameStatus, myPlayer, players, game, joinGame, movePlayer, leaveGame, flagArea, changeCamera, resetGame]
       )}
     >
       {children}

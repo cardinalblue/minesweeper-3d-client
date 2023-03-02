@@ -12,8 +12,8 @@ type GameUpdatedEvent = {
 
 type PlayersUpdatedEvent = {
   type: EventTypeEnum.PlayersUpdated;
-  myPlayerId: string;
   players: PlayerAggDto[];
+  myPlayerId: string;
 };
 
 type Event = GameUpdatedEvent | PlayersUpdatedEvent;

@@ -2,7 +2,13 @@ import { parsePlayerAggDto, parseGameAggDto } from '@/dtos';
 import { EventTypeEnum, GameUpdatedEvent, PlayersUpdatedEvent } from './events';
 import type { Event } from './events';
 import { CommandTypeEnum } from './commands';
-import type { PingCommand, MovePlayerCommand, FlagAreaCommand } from './commands';
+import type {
+  PingCommand,
+  MovePlayerCommand,
+  FlagAreaCommand,
+  ChangeCameraCommand,
+  ResetGameCommand,
+} from './commands';
 import { GameAgg, PlayerAgg } from '@/models/aggregates';
 import { DirectionVo } from '@/models/valueObjects';
 // import { DirectionVo, PositionVo } from '@/models/valueObjects';
@@ -110,6 +116,20 @@ export default class GameSocket {
   public flagArea() {
     const command: FlagAreaCommand = {
       type: CommandTypeEnum.FlagArea,
+    };
+    this.sendMessage(command);
+  }
+
+  public changeCamera() {
+    const command: ChangeCameraCommand = {
+      type: CommandTypeEnum.ChangeCamera,
+    };
+    this.sendMessage(command);
+  }
+
+  public resetGame() {
+    const command: ResetGameCommand = {
+      type: CommandTypeEnum.ResetGame,
     };
     this.sendMessage(command);
   }

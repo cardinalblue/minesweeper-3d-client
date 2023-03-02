@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect } from 'react';
 import type { NextPage } from 'next';
 import { useRouter } from 'next/router';
 import { DirectionVo } from '@/models/valueObjects';
@@ -11,20 +11,16 @@ const Room: NextPage = function Room() {
   const router = useRouter();
   const gameId = router.query.id as string;
   const styleContext = useContext(StyleContext);
-  const { game, players, joinGame, movePlayer, flagArea } = useContext(GameContext);
-  const [cameraCase, setCameraCase] = useState(0);
+  const { game, players, myPlayer, joinGame, movePlayer, flagArea, changeCamera, resetGame } = useContext(GameContext);
 
   useEffect(() => {
     if (!gameId) return;
     joinGame(gameId);
   }, [gameId]);
 
+  useKeyPress('KeyP', { onKeyDown: resetGame });
   useKeyPress('KeyF', { onKeyDown: flagArea });
-  useKeyPress('KeyC', {
-    onKeyDown: () => {
-      setCameraCase((cameraCase + 1) % 4);
-    },
-  });
+  useKeyPress('KeyC', { onKeyDown: changeCamera });
 
   const isUpPressed = useKeyPress('KeyW');
   const isRightPressed = useKeyPress('KeyD');
@@ -49,7 +45,7 @@ const Room: NextPage = function Room() {
       };
 
       doMove();
-      const goUpInterval = setInterval(doMove, 100);
+      const goUpInterval = setInterval(doMove, 200);
 
       return () => {
         clearInterval(goUpInterval);
@@ -63,7 +59,7 @@ const Room: NextPage = function Room() {
       className="w-screen h-screen flex"
       style={{ width: styleContext.windowWidth, height: styleContext.windowHeight }}
     >
-      {game && <GameCanvas game={game} players={players || []} cameraCase={cameraCase} />}
+      {game && players && myPlayer && <GameCanvas game={game} players={players} myPlayer={myPlayer} />}
     </main>
   );
 };
