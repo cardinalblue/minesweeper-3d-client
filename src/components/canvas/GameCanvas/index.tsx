@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef, useContext, useMemo } from 'react';
 import * as THREE from 'three';
 import forEach from 'lodash/forEach';
+import range from 'lodash/range';
 
 import ThreeJsContext from '@/contexts/ThreeJsContext';
 import { GameAgg, PlayerAgg } from '@/models/aggregates';
@@ -17,12 +18,13 @@ type Props = {
   cameraCase: number;
 };
 
+const getMineCountModelSrc = (mineCount: number) => `/mine_count/${mineCount}.gltf`;
 const CHARACTER_MODEL_SRC = '/characters/robot.gltf';
 const BASE_MODEL_SRC = '/bases/grass.gltf';
 const MOUND_MODEL_SRC = '/bases/mound.gltf';
 const ROOM_MODEL_SRC = '/bases/mini_room_art_copy.glb';
+const MINE_MODEL_SRC = '/bases/mine.gltf';
 const MOUNT_HEIGHT = 0.3;
-const CAMERA_HEIGHT = 30;
 const DIR_LIGHT_X_OFFSET = -10;
 const DIR_LIGHT_HEIGHT = 30;
 const DIR_LIGHT_Z_OFFSET = 50;
@@ -68,7 +70,7 @@ function GameCanvas({ players, game, cameraCase }: Props) {
     return newDirLight;
   });
   const [camera] = useState<THREE.PerspectiveCamera>(() => {
-    const newCamera = new THREE.PerspectiveCamera(40, 1, 0.1, 1000);
+    const newCamera = new THREE.PerspectiveCamera(50, 1, 0.1, 1000);
     scene.add(newCamera);
     return newCamera;
   });
@@ -92,6 +94,9 @@ function GameCanvas({ players, game, cameraCase }: Props) {
     loadModel(BASE_MODEL_SRC);
     loadModel(MOUND_MODEL_SRC);
     loadModel(ROOM_MODEL_SRC);
+    loadModel(MINE_MODEL_SRC);
+
+    range(8).map((count) => loadModel(getMineCountModelSrc(count + 1)));
   }, []);
 
   useEffect(
@@ -132,13 +137,13 @@ function GameCanvas({ players, game, cameraCase }: Props) {
       const gameSize = game.getSize();
       switch (cameraCase) {
         case 0:
-          camera.position.set(0, CAMERA_HEIGHT * 1, gameSize.getHeight() * 1 + 10);
+          camera.position.set(0, 40, 0);
           break;
         case 1:
-          camera.position.set(0, CAMERA_HEIGHT * 3, gameSize.getHeight() * 3 + 10);
+          camera.position.set(0, 15, gameSize.getHeight());
           break;
         case 2:
-          camera.position.set(0, CAMERA_HEIGHT * 6, gameSize.getHeight() * 6 + 10);
+          camera.position.set(0, 40, gameSize.getHeight() * 6 + 10);
           break;
         case 3:
           camera.position.set(0, 3, gameSize.getHeight() * 1.5);
@@ -155,6 +160,8 @@ function GameCanvas({ players, game, cameraCase }: Props) {
     function updateOnGameChange() {
       const [posOffsetX, posOffsetZ] = posOffset;
       const mountObjs: THREE.Group[] = [];
+      const mineObjs: THREE.Group[] = [];
+      const mineCountObjs: THREE.Group[] = [];
       game.traverse((area, pos) => {
         if (!area.getRevealed()) {
           const mountObject = cloneModel(MOUND_MODEL_SRC);
@@ -164,12 +171,34 @@ function GameCanvas({ players, game, cameraCase }: Props) {
             scene.add(mountObject);
             mountObjs.push(mountObject);
           }
+        } else if (area.getHasMine()) {
+          const mineObject = cloneModel(MINE_MODEL_SRC);
+          if (mineObject) {
+            enableShadowOnObject(mineObject);
+            mineObject.position.set(posOffsetX + pos.getX() + 0.5, 0, posOffsetZ + pos.getZ() + 0.5);
+            scene.add(mineObject);
+            mineObjs.push(mineObject);
+          }
+        } else {
+          const mineCountObject = cloneModel(getMineCountModelSrc(area.getAdjMinesCount()));
+          if (mineCountObject) {
+            enableShadowOnObject(mineCountObject);
+            mineCountObject.position.set(posOffsetX + pos.getX() + 0.5, 0, posOffsetZ + pos.getZ() + 0.5);
+            scene.add(mineCountObject);
+            mineCountObjs.push(mineCountObject);
+          }
         }
       });
 
       return () => {
-        mountObjs.forEach((mountObj) => {
-          scene.remove(mountObj);
+        mountObjs.forEach((obj) => {
+          scene.remove(obj);
+        });
+        mineCountObjs.forEach((obj) => {
+          scene.remove(obj);
+        });
+        mineObjs.forEach((obj) => {
+          scene.remove(obj);
         });
       };
     },
