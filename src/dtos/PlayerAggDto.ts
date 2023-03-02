@@ -7,6 +7,7 @@ type PlayerAggDto = {
   name: string;
   position: PositionVoDto;
   direction: 0 | 1 | 2 | 3;
+  guilty: boolean;
 };
 
 export function parsePlayerAggDto(dto: PlayerAggDto): PlayerAgg {
@@ -14,7 +15,8 @@ export function parsePlayerAggDto(dto: PlayerAggDto): PlayerAgg {
     dto.id,
     dto.name,
     PositionVo.new(dto.position.x, dto.position.z),
-    DirectionVo.new(dto.direction)
+    DirectionVo.new(dto.direction),
+    dto.guilty
   );
 }
 

@@ -18,7 +18,7 @@ export function parseGameAggDto(dto: GameAggDto): GameAgg {
     SizeVo.new(dto.size.width, dto.size.height),
     dto.minesCount,
     mapMatrix(dto.areas, (areaDto) =>
-      AreaVo.new(areaDto.revealed, areaDto.flagged, areaDto.hasMine, areaDto.adjMinesCount)
+      AreaVo.new(areaDto.revealed, areaDto.flagged, areaDto.hasMine, areaDto.adjMinesCount, areaDto.boomed)
     ),
     dto.camera
   );

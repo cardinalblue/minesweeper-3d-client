@@ -7,15 +7,18 @@ export default class AreaVo {
 
   private adjMinesCount: number;
 
-  constructor(revealed: boolean, flagged: boolean, hasMine: boolean, adjMinesCount: number) {
+  private boomed: boolean;
+
+  constructor(revealed: boolean, flagged: boolean, hasMine: boolean, adjMinesCount: number, boomed: boolean) {
     this.revealed = revealed;
     this.flagged = flagged;
     this.hasMine = hasMine;
     this.adjMinesCount = adjMinesCount;
+    this.boomed = boomed;
   }
 
-  static new(revealed: boolean, flagged: boolean, hasMine: boolean, adjMinesCount: number): AreaVo {
-    return new AreaVo(revealed, flagged, hasMine, adjMinesCount);
+  static new(revealed: boolean, flagged: boolean, hasMine: boolean, adjMinesCount: number, boomed: boolean): AreaVo {
+    return new AreaVo(revealed, flagged, hasMine, adjMinesCount, boomed);
   }
 
   public getRevealed() {
@@ -32,5 +35,9 @@ export default class AreaVo {
 
   public getAdjMinesCount() {
     return this.adjMinesCount;
+  }
+
+  public getBoomed() {
+    return this.boomed;
   }
 }

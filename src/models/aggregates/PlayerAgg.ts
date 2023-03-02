@@ -9,15 +9,18 @@ export default class PlayerAgg {
 
   private direction: DirectionVo;
 
-  constructor(id: string, name: string, position: PositionVo, direction: DirectionVo) {
+  private guilty: boolean;
+
+  constructor(id: string, name: string, position: PositionVo, direction: DirectionVo, guilty: boolean) {
     this.id = id;
     this.name = name;
     this.position = position;
     this.direction = direction;
+    this.guilty = guilty;
   }
 
-  static new(id: string, name: string, position: PositionVo, direction: DirectionVo): PlayerAgg {
-    return new PlayerAgg(id, name, position, direction);
+  static new(id: string, name: string, position: PositionVo, direction: DirectionVo, guilty: boolean): PlayerAgg {
+    return new PlayerAgg(id, name, position, direction, guilty);
   }
 
   public getId(): string {
@@ -34,5 +37,9 @@ export default class PlayerAgg {
 
   public getDirection(): DirectionVo {
     return this.direction;
+  }
+
+  public getGuilty() {
+    return this.guilty;
   }
 }

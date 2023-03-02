@@ -1,16 +1,11 @@
 import { useEffect, useState, useRef, useContext, useMemo } from 'react';
 import * as THREE from 'three';
-import forEach from 'lodash/forEach';
 import range from 'lodash/range';
 
 import ThreeJsContext from '@/contexts/ThreeJsContext';
 import { GameAgg, PlayerAgg } from '@/models/aggregates';
 import useDomRect from '@/hooks/useDomRect';
 import { enableShadowOnObject } from '@/libs/threeHelper';
-
-type CachedObjectMap = {
-  [key: number | string]: THREE.Group | undefined;
-};
 
 type Props = {
   players: PlayerAgg[];
@@ -25,6 +20,7 @@ const MOUND_MODEL_SRC = '/bases/mound.gltf';
 const ROOM_MODEL_SRC = '/bases/mini_room_art_copy.glb';
 const MINE_MODEL_SRC = '/bases/mine.gltf';
 const FLAG_MODEL_SRC = '/bases/flag.gltf';
+const BOOM_MODEL_SRC = '/bases/boom.gltf';
 const MOUNT_MODEL_HEIGHT = 0.3;
 const DIR_LIGHT_X_OFFSET = -10;
 const DIR_LIGHT_HEIGHT = 30;
@@ -86,7 +82,6 @@ function GameCanvas({ players, myPlayer, game }: Props) {
     return newRenderer;
   });
   const { loadModel, cloneModel } = useContext(ThreeJsContext);
-  const cachedPlayerObjects = useRef<CachedObjectMap>({});
 
   useEffect(() => {
     loadModel(CHARACTER_MODEL_SRC);
@@ -95,6 +90,7 @@ function GameCanvas({ players, myPlayer, game }: Props) {
     loadModel(ROOM_MODEL_SRC);
     loadModel(MINE_MODEL_SRC);
     loadModel(FLAG_MODEL_SRC);
+    loadModel(BOOM_MODEL_SRC);
 
     range(8).map((count) => loadModel(getMineCountModelSrc(count + 1)));
   }, []);
@@ -189,6 +185,7 @@ function GameCanvas({ players, myPlayer, game }: Props) {
       const flagObjs: THREE.Group[] = [];
       const mineObjs: THREE.Group[] = [];
       const mineCountObjs: THREE.Group[] = [];
+      const boomObjs: THREE.Group[] = [];
       game.traverse((area, pos) => {
         if (!area.getRevealed()) {
           const mountObject = cloneModel(MOUND_MODEL_SRC);
@@ -207,12 +204,22 @@ function GameCanvas({ players, myPlayer, game }: Props) {
             flagObjs.push(flagObject);
           }
         } else if (area.getHasMine()) {
-          const mineObject = cloneModel(MINE_MODEL_SRC);
-          if (mineObject) {
-            enableShadowOnObject(mineObject);
-            mineObject.position.set(boardOffsetX + pos.getX(), 0, boardOffsetZ + pos.getZ());
-            scene.add(mineObject);
-            mineObjs.push(mineObject);
+          if (area.getBoomed()) {
+            const boomObject = cloneModel(BOOM_MODEL_SRC);
+            if (boomObject) {
+              enableShadowOnObject(boomObject);
+              boomObject.position.set(boardOffsetX + pos.getX(), 0, boardOffsetZ + pos.getZ());
+              scene.add(boomObject);
+              boomObjs.push(boomObject);
+            }
+          } else {
+            const mineObject = cloneModel(MINE_MODEL_SRC);
+            if (mineObject) {
+              enableShadowOnObject(mineObject);
+              mineObject.position.set(boardOffsetX + pos.getX(), 0, boardOffsetZ + pos.getZ());
+              scene.add(mineObject);
+              mineObjs.push(mineObject);
+            }
           }
         } else {
           const mineCountObject = cloneModel(getMineCountModelSrc(area.getAdjMinesCount()));
@@ -236,6 +243,9 @@ function GameCanvas({ players, myPlayer, game }: Props) {
           scene.remove(obj);
         });
         flagObjs.forEach((obj) => {
+          scene.remove(obj);
+        });
+        boomObjs.forEach((obj) => {
           scene.remove(obj);
         });
       };
@@ -284,47 +294,44 @@ function GameCanvas({ players, myPlayer, game }: Props) {
   );
 
   useEffect(
-    function handlePlayersUpdated() {
+    function updatePlayersOnUpdate() {
+      const playerObjs: THREE.Group[] = [];
+
       players.forEach((player) => {
         const [boardOffsetX, boardOffsetZ] = boardOffset;
 
-        let playerObject: THREE.Group | null;
-        const cachedPlayerOject = cachedPlayerObjects.current[player.getId()];
-
-        if (cachedPlayerOject) {
-          playerObject = cachedPlayerOject;
-        } else {
-          playerObject = cloneModel(CHARACTER_MODEL_SRC);
-          if (playerObject) {
-            scene.add(playerObject);
-            cachedPlayerObjects.current[player.getId()] = playerObject;
-            enableShadowOnObject(playerObject);
-          }
-        }
-
+        const playerObject = cloneModel(CHARACTER_MODEL_SRC);
         if (playerObject) {
+          enableShadowOnObject(playerObject);
+          scene.add(playerObject);
+          playerObjs.push(playerObject);
+
           const playerPos = player.getPosition();
-          let zPos = 0;
+          playerObject.position.set(boardOffsetX + playerPos.getX(), 0, boardOffsetZ + playerPos.getZ());
+          playerObject.rotation.y = Math.PI - (player.getDirection().toNumber() * Math.PI) / 2;
+
+          if (player.getGuilty()) {
+            playerObject.position.setY(5.5);
+            playerObject.translateZ(4);
+            // playerObject.translateX(3);
+            playerObject.scale.set(3, 3, 3);
+            playerObject.rotation.set(-Math.PI / 4, 0, Math.PI / 7);
+          }
+
           if (game.includePos(playerPos)) {
             const areaStood = game.getArea(playerPos);
-            zPos = areaStood.getRevealed() ? 0 : MOUNT_MODEL_HEIGHT;
+            if (!areaStood.getRevealed()) {
+              playerObject.position.setY(MOUNT_MODEL_HEIGHT);
+            }
           }
-          playerObject.position.set(
-            boardOffsetX + player.getPosition().getX(),
-            zPos,
-            boardOffsetZ + player.getPosition().getZ()
-          );
-          playerObject.rotation.y = Math.PI - (player.getDirection().toNumber() * Math.PI) / 2;
         }
       });
 
-      const playerKeys = players.map((player) => player.getId());
-      forEach(cachedPlayerObjects.current, (playerObject, playerId) => {
-        if (!playerKeys.includes(playerId) && playerObject) {
-          scene.remove(playerObject);
-          delete cachedPlayerObjects.current[playerId];
-        }
-      });
+      return () => {
+        playerObjs.forEach((obj) => {
+          scene.remove(obj);
+        });
+      };
     },
     [scene, cloneModel, boardOffset, players, game]
   );
