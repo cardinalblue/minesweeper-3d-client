@@ -1,4 +1,4 @@
-import { SizeVo, AreaVo } from '../valueObjects';
+import { SizeVo, AreaVo, PositionVo } from '../valueObjects';
 
 export default class GameAgg {
   private id: string;
@@ -34,5 +34,13 @@ export default class GameAgg {
 
   public getAreas() {
     return this.areas;
+  }
+
+  public traverse(cb: (area: AreaVo, pos: PositionVo) => void) {
+    this.areas.forEach((areaCols, x) => {
+      areaCols.forEach((area, z) => {
+        cb(area, new PositionVo(x, z));
+      });
+    });
   }
 }

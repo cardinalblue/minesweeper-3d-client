@@ -14,19 +14,20 @@ type CachedObjectMap = {
 type Props = {
   players: PlayerAgg[];
   game: GameAgg;
+  cameraCase: number;
 };
 
 const CHARACTER_MODEL_SRC = '/characters/robot.gltf';
 const BASE_MODEL_SRC = '/bases/grass.gltf';
+const MOUNT_MODEL_SRC = '/bases/mount.gltf';
 const ROOM_MODEL_SRC = '/bases/mini_room_art_copy.glb';
 const CAMERA_HEIGHT = 30;
-const CAMERA_Z_OFFSET = 40;
 const DIR_LIGHT_X_OFFSET = -10;
 const DIR_LIGHT_HEIGHT = 30;
 const DIR_LIGHT_Z_OFFSET = 50;
 const HEMI_LIGHT_HEIGHT = 20;
 
-function GameCanvas({ players, game }: Props) {
+function GameCanvas({ players, game, cameraCase }: Props) {
   console.log(game, players);
 
   const wrapperRef = useRef<HTMLDivElement>(null);
@@ -67,8 +68,6 @@ function GameCanvas({ players, game }: Props) {
   });
   const [camera] = useState<THREE.PerspectiveCamera>(() => {
     const newCamera = new THREE.PerspectiveCamera(40, 1, 0.1, 1000);
-    newCamera.position.set(0, CAMERA_HEIGHT, CAMERA_Z_OFFSET);
-    newCamera.lookAt(0, 0, -10);
     scene.add(newCamera);
     return newCamera;
   });
@@ -90,6 +89,7 @@ function GameCanvas({ players, game }: Props) {
   useEffect(() => {
     loadModel(CHARACTER_MODEL_SRC);
     loadModel(BASE_MODEL_SRC);
+    loadModel(MOUNT_MODEL_SRC);
     loadModel(ROOM_MODEL_SRC);
   }, []);
 
@@ -127,6 +127,39 @@ function GameCanvas({ players, game }: Props) {
   );
 
   useEffect(
+    function updateCameraPositionOnGameSizeChange() {
+      const gameSize = game.getSize();
+      switch (cameraCase) {
+        case 0:
+          camera.position.set(0, CAMERA_HEIGHT * 1, gameSize.getHeight() * 1 + 10);
+          break;
+        case 1:
+          camera.position.set(0, CAMERA_HEIGHT * 3, gameSize.getHeight() * 3 + 10);
+          break;
+        case 2:
+          camera.position.set(0, CAMERA_HEIGHT * 6, gameSize.getHeight() * 6 + 10);
+          break;
+        case 3:
+          camera.position.set(0, 3, gameSize.getHeight() * 1.5);
+          break;
+        default:
+          break;
+      }
+      camera.lookAt(0, 0, 0);
+    },
+    [camera, cameraCase, game]
+  );
+
+  useEffect(
+    function updateOnGameChange() {
+      game.traverse((area, pos) => {
+        console.log(area, pos);
+      });
+    },
+    [cloneModel, game]
+  );
+
+  useEffect(
     function handleBasesUpdated() {
       const grassObject = cloneModel(BASE_MODEL_SRC);
       if (!grassObject) return;
@@ -138,6 +171,7 @@ function GameCanvas({ players, game }: Props) {
       grassObject.traverse(function (obj) {
         // for all mesh objects in grassObject
         if (obj.type === 'Mesh') {
+          // @ts-ignore
           obj.material.color = new THREE.Color('rgb(225, 215, 255)');
         }
       });
@@ -147,8 +181,9 @@ function GameCanvas({ players, game }: Props) {
       if (!roomObject) return;
 
       enableShadowOnObject(roomObject);
-      roomObject.position.set(0, -0.15, 0);
-      roomObject.scale.set(game.getSize().getWidth() * 0.13, 1.0, game.getSize().getHeight() * 0.13);
+      const roomScale = game.getSize().getWidth() * 0.1;
+      roomObject.position.set(0, 1, 0);
+      roomObject.scale.set(roomScale, roomScale, roomScale);
       roomObject.rotateY(Math.PI / 4);
       scene.add(roomObject);
     },

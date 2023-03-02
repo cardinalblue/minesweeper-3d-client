@@ -1,4 +1,4 @@
-import { useContext, useEffect } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import type { NextPage } from 'next';
 import { useRouter } from 'next/router';
 import { DirectionVo } from '@/models/valueObjects';
@@ -12,6 +12,7 @@ const Room: NextPage = function Room() {
   const gameId = router.query.id as string;
   const styleContext = useContext(StyleContext);
   const { game, players, joinGame, movePlayer, revealArea, flagArea } = useContext(GameContext);
+  const [cameraCase, setCameraCase] = useState(0);
 
   useEffect(() => {
     if (!gameId) return;
@@ -20,6 +21,11 @@ const Room: NextPage = function Room() {
 
   useKeyPress('KeyF', { onKeyDown: flagArea });
   useKeyPress('Space', { onKeyDown: revealArea });
+  useKeyPress('KeyC', {
+    onKeyDown: () => {
+      setCameraCase((cameraCase + 1) % 4);
+    },
+  });
 
   const isUpPressed = useKeyPress('KeyW');
   const isRightPressed = useKeyPress('KeyD');
@@ -58,7 +64,7 @@ const Room: NextPage = function Room() {
       className="w-screen h-screen flex"
       style={{ width: styleContext.windowWidth, height: styleContext.windowHeight }}
     >
-      {game && <GameCanvas game={game} players={players || []} />}
+      {game && <GameCanvas game={game} players={players || []} cameraCase={cameraCase} />}
     </main>
   );
 };
