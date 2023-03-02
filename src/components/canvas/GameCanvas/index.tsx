@@ -179,7 +179,7 @@ function GameCanvas({ players, game, cameraCase }: Props) {
   useEffect(
     function handleBasesUpdated() {
       const grassObject = cloneModel(BASE_MODEL_SRC);
-      if (!grassObject) return;
+      if (!grassObject) return () => {};
 
       enableShadowOnObject(grassObject);
       grassObject.position.set(0, -0.15, 0);
@@ -195,7 +195,11 @@ function GameCanvas({ players, game, cameraCase }: Props) {
       scene.add(grassObject);
 
       const roomObject = cloneModel(ROOM_MODEL_SRC);
-      if (!roomObject) return;
+      if (!roomObject) {
+        return () => {
+          scene.remove(grassObject);
+        };
+      }
 
       enableShadowOnObject(roomObject);
       const roomScale = game.getSize().getWidth() * 0.1;
@@ -203,6 +207,11 @@ function GameCanvas({ players, game, cameraCase }: Props) {
       roomObject.scale.set(roomScale, roomScale, roomScale);
       roomObject.rotateY(Math.PI / 4);
       scene.add(roomObject);
+
+      return () => {
+        scene.remove(grassObject);
+        scene.remove(roomObject);
+      };
     },
     [scene, cloneModel, game]
   );
