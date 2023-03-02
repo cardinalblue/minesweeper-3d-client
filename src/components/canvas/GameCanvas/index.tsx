@@ -142,8 +142,8 @@ function GameCanvas({ players, myPlayer, game }: Props) {
           camera.lookAt(boardOffsetX + myPlayerPosX, 0, boardOffsetZ + myPlayerPosZ);
           break;
         case 2:
-          camera.position.set(boardOffsetX + myPlayerPosX, 10, boardOffsetZ + myPlayerPosZ + 5);
-          camera.lookAt(boardOffsetX + myPlayerPosX, 0, boardOffsetZ + myPlayerPosZ);
+          camera.position.set(0, 10, 50);
+          camera.lookAt(0, 10, 0);
           break;
         case 3:
           camera.position.set(boardOffsetX + myPlayerPosX, 60, boardOffsetZ + myPlayerPosZ + 120);
@@ -314,7 +314,7 @@ function GameCanvas({ players, myPlayer, game }: Props) {
             playerObject.position.setY(5.5);
             playerObject.translateZ(4);
             // playerObject.translateX(3);
-            playerObject.scale.set(3, 3, 3);
+            playerObject.scale.set(2.5, 2.5, 2.5);
             playerObject.rotation.set(-Math.PI / 4, 0, Math.PI / 7);
           }
 
