@@ -134,6 +134,13 @@ function GameCanvas({ players, game }: Props) {
       enableShadowOnObject(grassObject);
       grassObject.position.set(0, -0.15, 0);
       grassObject.scale.set(game.getSize().getWidth(), 1, game.getSize().getHeight());
+      // Adjust the color of the grass object
+      grassObject.traverse(function (obj) {
+        // for all mesh objects in grassObject
+        if (obj.type === 'Mesh') {
+          obj.material.color = new THREE.Color('rgb(225, 215, 255)');
+        }
+      });
       scene.add(grassObject);
 
       const roomObject = cloneModel(ROOM_MODEL_SRC);
