@@ -19,8 +19,9 @@ type Props = {
 
 const CHARACTER_MODEL_SRC = '/characters/robot.gltf';
 const BASE_MODEL_SRC = '/bases/grass.gltf';
-const MOUNT_MODEL_SRC = '/bases/mount.gltf';
+const MOUND_MODEL_SRC = '/bases/mound.gltf';
 const ROOM_MODEL_SRC = '/bases/mini_room_art_copy.glb';
+const MOUNT_HEIGHT = 0.3;
 const CAMERA_HEIGHT = 30;
 const DIR_LIGHT_X_OFFSET = -10;
 const DIR_LIGHT_HEIGHT = 30;
@@ -81,7 +82,7 @@ function GameCanvas({ players, game, cameraCase }: Props) {
   const { loadModel, cloneModel } = useContext(ThreeJsContext);
   const cachedPlayerObjects = useRef<CachedObjectMap>({});
 
-  const offset: [x: number, z: number] = useMemo(
+  const posOffset: [x: number, z: number] = useMemo(
     () => [-Math.floor(game.getSize().getWidth() / 2), -Math.floor(game.getSize().getHeight() / 2)],
     [game.getSize().getWidth(), game.getSize().getHeight()]
   );
@@ -89,7 +90,7 @@ function GameCanvas({ players, game, cameraCase }: Props) {
   useEffect(() => {
     loadModel(CHARACTER_MODEL_SRC);
     loadModel(BASE_MODEL_SRC);
-    loadModel(MOUNT_MODEL_SRC);
+    loadModel(MOUND_MODEL_SRC);
     loadModel(ROOM_MODEL_SRC);
   }, []);
 
@@ -152,11 +153,27 @@ function GameCanvas({ players, game, cameraCase }: Props) {
 
   useEffect(
     function updateOnGameChange() {
+      const [posOffsetX, posOffsetZ] = posOffset;
+      const mountObjs: THREE.Group[] = [];
       game.traverse((area, pos) => {
-        console.log(area, pos);
+        if (!area.getRevealed()) {
+          const mountObject = cloneModel(MOUND_MODEL_SRC);
+          if (mountObject) {
+            enableShadowOnObject(mountObject);
+            mountObject.position.set(posOffsetX + pos.getX() + 0.5, 0, posOffsetZ + pos.getZ() + 0.5);
+            scene.add(mountObject);
+            mountObjs.push(mountObject);
+          }
+        }
       });
+
+      return () => {
+        mountObjs.forEach((mountObj) => {
+          scene.remove(mountObj);
+        });
+      };
     },
-    [cloneModel, game]
+    [scene, cloneModel, game, posOffset]
   );
 
   useEffect(
@@ -193,7 +210,7 @@ function GameCanvas({ players, game, cameraCase }: Props) {
   useEffect(
     function handlePlayersUpdated() {
       players.forEach((player) => {
-        const [offsetX, offsetZ] = offset;
+        const [posOffsetX, posOffsetZ] = posOffset;
 
         let playerObject: THREE.Group | null;
         const cachedPlayerOject = cachedPlayerObjects.current[player.getId()];
@@ -210,10 +227,12 @@ function GameCanvas({ players, game, cameraCase }: Props) {
         }
 
         if (playerObject) {
+          const playerPos = player.getPosition();
+          const areaStood = game.getArea(playerPos);
           playerObject.position.set(
-            offsetX + player.getPosition().getX() + 0.5,
-            0,
-            offsetZ + player.getPosition().getZ() + 0.5
+            posOffsetX + player.getPosition().getX() + 0.5,
+            areaStood.getRevealed() ? 0 : MOUNT_HEIGHT,
+            posOffsetZ + player.getPosition().getZ() + 0.5
           );
           playerObject.rotation.y = Math.PI - (player.getDirection().toNumber() * Math.PI) / 2;
         }
@@ -227,7 +246,7 @@ function GameCanvas({ players, game, cameraCase }: Props) {
         }
       });
     },
-    [scene, cloneModel, offset, players]
+    [scene, cloneModel, posOffset, players, game]
   );
 
   useEffect(
