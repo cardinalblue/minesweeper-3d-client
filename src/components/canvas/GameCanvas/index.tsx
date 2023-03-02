@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, useContext } from 'react';
+import { useEffect, useState, useRef, useContext, useMemo } from 'react';
 import * as THREE from 'three';
 import forEach from 'lodash/forEach';
 
@@ -81,6 +81,10 @@ function GameCanvas({ players, game }: Props) {
   const { loadModel, cloneModel } = useContext(ThreeJsContext);
   const cachedPlayerObjects = useRef<CachedObjectMap>({});
 
+  const offset: [x: number, z: number] = useMemo(() => {
+    return [-Math.floor(game.getSize().getWidth() / 2), -Math.floor(game.getSize().getHeight() / 2)];
+  }, [game.getSize().getWidth(), game.getSize().getHeight()]);
+
   useEffect(() => {
     loadModel(CHARACTER_MODEL_SRC);
     loadModel(BASE_MODEL_SRC);
@@ -136,7 +140,7 @@ function GameCanvas({ players, game }: Props) {
       enableShadowOnObject(roomObject);
       roomObject.position.set(0, -0.15, 0);
       roomObject.scale.set(game.getSize().getWidth() * 0.13, 1.0, game.getSize().getHeight() * 0.13);
-      roomObject.rotateY(Math.PI * 0.3);
+      roomObject.rotateY(Math.PI / 4);
       scene.add(roomObject);
     },
     [scene, cloneModel, game]
@@ -145,6 +149,8 @@ function GameCanvas({ players, game }: Props) {
   useEffect(
     function handlePlayersUpdated() {
       players.forEach((player) => {
+        const [offsetX, offsetZ] = offset;
+
         let playerObject: THREE.Group | null;
         const cachedPlayerOject = cachedPlayerObjects.current[player.getId()];
 
@@ -160,7 +166,11 @@ function GameCanvas({ players, game }: Props) {
         }
 
         if (playerObject) {
-          playerObject.position.set(player.getPosition().getX() + 0.5, 0, player.getPosition().getZ() + 0.5);
+          playerObject.position.set(
+            offsetX + player.getPosition().getX() + 0.5,
+            0,
+            offsetZ + player.getPosition().getZ() + 0.5
+          );
           playerObject.rotation.y = Math.PI - (player.getDirection().toNumber() * Math.PI) / 2;
         }
       });
@@ -173,7 +183,7 @@ function GameCanvas({ players, game }: Props) {
         }
       });
     },
-    [scene, cloneModel, players]
+    [scene, cloneModel, offset, players]
   );
 
   useEffect(
