@@ -18,6 +18,7 @@ type Props = {
 
 const CHARACTER_MODEL_SRC = '/characters/robot.gltf';
 const BASE_MODEL_SRC = '/bases/grass.gltf';
+const ROOM_MODEL_SRC = '/bases/mini_room_art_copy.glb';
 const CAMERA_HEIGHT = 30;
 const CAMERA_Z_OFFSET = 40;
 const DIR_LIGHT_HEIGHT = 20;
@@ -83,6 +84,7 @@ function GameCanvas({ players, game }: Props) {
   useEffect(() => {
     loadModel(CHARACTER_MODEL_SRC);
     loadModel(BASE_MODEL_SRC);
+    loadModel(ROOM_MODEL_SRC);
   }, []);
 
   useEffect(
@@ -127,6 +129,15 @@ function GameCanvas({ players, game }: Props) {
       grassObject.position.set(0, -0.15, 0);
       grassObject.scale.set(game.getSize().getWidth(), 1, game.getSize().getHeight());
       scene.add(grassObject);
+
+      const roomObject = cloneModel(ROOM_MODEL_SRC);
+      if (!roomObject) return;
+
+      enableShadowOnObject(roomObject);
+      roomObject.position.set(0, -0.15, 0);
+      roomObject.scale.set(game.getSize().getWidth() * 0.13, 1.0, game.getSize().getHeight() * 0.13);
+      roomObject.rotateY(Math.PI * 0.3);
+      scene.add(roomObject);
     },
     [scene, cloneModel, game]
   );
