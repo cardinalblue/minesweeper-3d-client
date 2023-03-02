@@ -1,0 +1,25 @@
+{
+  "extends": ["plugin:@next/next/recommended", "airbnb", "airbnb-typescript", "prettier"],
+  "parserOptions": {
+    "project": "./tsconfig.json"
+  },
+  "rules": {
+    "import/no-extraneous-dependencies": [
+      "error",
+      {
+        "devDependencies": ["**/*.stories.*", "**/*.test.*"],
+        "peerDependencies": true
+      }
+    ],
+    "react/require-default-props": "off",
+    "react/react-in-jsx-scope": "off",
+    "react/jsx-props-no-spreading": "off",
+    "react/destructuring-assignment": "off",
+    "import/extensions": "off",
+    "default-param-last": "off",
+    "prefer-arrow-callback": "off",
+    "import/prefer-default-export": "off",
+    "@typescript-eslint/default-param-last": "off",
+    "no-param-reassign": ["error", { "props": true, "ignorePropertyModificationsFor": ["state"] }]
+  }
+}
