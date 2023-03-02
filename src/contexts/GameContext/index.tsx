@@ -12,7 +12,7 @@ type ContextValue = {
   game: GameAgg | null;
   joinGame: (gameId: string) => void;
   movePlayer: (direction: DirectionVo) => void;
-  revealArea: (itemId: number) => void;
+  revealArea: () => void;
   flagArea: () => void;
   leaveGame: () => void;
 };

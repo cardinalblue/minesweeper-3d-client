@@ -3,7 +3,6 @@ import * as THREE from 'three';
 import forEach from 'lodash/forEach';
 
 import ThreeJsContext from '@/contexts/ThreeJsContext';
-import { PositionVo } from '@/models/valueObjects';
 import { GameAgg, PlayerAgg } from '@/models/aggregates';
 import useDomRect from '@/hooks/useDomRect';
 import { enableShadowOnObject } from '@/libs/threeHelper';
@@ -47,7 +46,7 @@ function GameCanvas({ players, game }: Props) {
 
     return newScene;
   });
-  const [dirLight] = useState<THREE.DirectionalLight>(() => {
+  useState<THREE.DirectionalLight>(() => {
     const newDirLight = new THREE.DirectionalLight(0xffffff, 0.5);
     newDirLight.castShadow = true;
     newDirLight.position.set(0, DIR_LIGHT_HEIGHT, DIR_LIGHT_Z_OFFSET);
