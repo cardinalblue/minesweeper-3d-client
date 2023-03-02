@@ -21,8 +21,9 @@ const BASE_MODEL_SRC = '/bases/grass.gltf';
 const ROOM_MODEL_SRC = '/bases/mini_room_art_copy.glb';
 const CAMERA_HEIGHT = 30;
 const CAMERA_Z_OFFSET = 40;
-const DIR_LIGHT_HEIGHT = 20;
-const DIR_LIGHT_Z_OFFSET = 20;
+const DIR_LIGHT_X_OFFSET = -10;
+const DIR_LIGHT_HEIGHT = 30;
+const DIR_LIGHT_Z_OFFSET = 50;
 const HEMI_LIGHT_HEIGHT = 20;
 
 function GameCanvas({ players, game }: Props) {
@@ -50,7 +51,7 @@ function GameCanvas({ players, game }: Props) {
   useState<THREE.DirectionalLight>(() => {
     const newDirLight = new THREE.DirectionalLight(0xffffff, 0.5);
     newDirLight.castShadow = true;
-    newDirLight.position.set(0, DIR_LIGHT_HEIGHT, DIR_LIGHT_Z_OFFSET);
+    newDirLight.position.set(DIR_LIGHT_X_OFFSET, DIR_LIGHT_HEIGHT, DIR_LIGHT_Z_OFFSET);
     newDirLight.target.position.set(0, 0, 0);
     newDirLight.shadow.mapSize.width = 4096;
     newDirLight.shadow.mapSize.height = 4096;
