@@ -81,9 +81,10 @@ function GameCanvas({ players, game }: Props) {
   const { loadModel, cloneModel } = useContext(ThreeJsContext);
   const cachedPlayerObjects = useRef<CachedObjectMap>({});
 
-  const offset: [x: number, z: number] = useMemo(() => {
-    return [-Math.floor(game.getSize().getWidth() / 2), -Math.floor(game.getSize().getHeight() / 2)];
-  }, [game.getSize().getWidth(), game.getSize().getHeight()]);
+  const offset: [x: number, z: number] = useMemo(
+    () => [-Math.floor(game.getSize().getWidth() / 2), -Math.floor(game.getSize().getHeight() / 2)],
+    [game.getSize().getWidth(), game.getSize().getHeight()]
+  );
 
   useEffect(() => {
     loadModel(CHARACTER_MODEL_SRC);
