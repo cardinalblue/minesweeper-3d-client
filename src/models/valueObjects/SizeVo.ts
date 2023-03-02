@@ -1,3 +1,5 @@
+import PositionVo from './PositionVo';
+
 export default class SizeVo {
   private width: number;
 
@@ -22,5 +24,14 @@ export default class SizeVo {
 
   public getHeight(): number {
     return this.height;
+  }
+
+  public includePos(position: PositionVo): boolean {
+    const x = position.getX();
+    const z = position.getZ();
+    if (x < 0 || x >= this.width || z < 0 || z >= this.height) {
+      return false;
+    }
+    return true;
   }
 }

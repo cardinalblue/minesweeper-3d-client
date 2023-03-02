@@ -32,12 +32,16 @@ export default class GameAgg {
     return this.minesCount;
   }
 
-  public getArea(pos: PositionVo) {
+  public getArea(pos: PositionVo): AreaVo {
     return this.areas[pos.getX()][pos.getZ()];
   }
 
   public getAreas() {
     return this.areas;
+  }
+
+  public includePos(pos: PositionVo) {
+    return this.size.includePos(pos);
   }
 
   public traverse(cb: (area: AreaVo, pos: PositionVo) => void) {

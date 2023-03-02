@@ -12,7 +12,6 @@ type ContextValue = {
   game: GameAgg | null;
   joinGame: (gameId: string) => void;
   movePlayer: (direction: DirectionVo) => void;
-  revealArea: () => void;
   flagArea: () => void;
   leaveGame: () => void;
 };
@@ -25,7 +24,6 @@ function createInitialContextValue(): ContextValue {
     game: null,
     joinGame: () => {},
     movePlayer: () => {},
-    revealArea: () => {},
     flagArea: () => {},
     leaveGame: () => {},
   };
@@ -106,10 +104,6 @@ export function Provider({ children }: Props) {
     gameSocket?.disconnect();
   }, [gameSocket]);
 
-  const revealArea = useCallback(() => {
-    gameSocket?.revealArea();
-  }, [gameSocket]);
-
   const flagArea = useCallback(() => {
     gameSocket?.flagArea();
   }, [gameSocket]);
@@ -125,10 +119,9 @@ export function Provider({ children }: Props) {
           joinGame,
           movePlayer,
           leaveGame,
-          revealArea,
           flagArea,
         }),
-        [gameStatus, myPlayer, players, game, joinGame, movePlayer, leaveGame, revealArea]
+        [gameStatus, myPlayer, players, game, joinGame, movePlayer, leaveGame]
       )}
     >
       {children}

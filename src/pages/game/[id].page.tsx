@@ -11,7 +11,7 @@ const Room: NextPage = function Room() {
   const router = useRouter();
   const gameId = router.query.id as string;
   const styleContext = useContext(StyleContext);
-  const { game, players, joinGame, movePlayer, revealArea, flagArea } = useContext(GameContext);
+  const { game, players, joinGame, movePlayer, flagArea } = useContext(GameContext);
   const [cameraCase, setCameraCase] = useState(0);
 
   useEffect(() => {
@@ -20,7 +20,6 @@ const Room: NextPage = function Room() {
   }, [gameId]);
 
   useKeyPress('KeyF', { onKeyDown: flagArea });
-  useKeyPress('Space', { onKeyDown: revealArea });
   useKeyPress('KeyC', {
     onKeyDown: () => {
       setCameraCase((cameraCase + 1) % 4);

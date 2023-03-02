@@ -2,7 +2,7 @@ import { parsePlayerAggDto, parseGameAggDto } from '@/dtos';
 import { EventTypeEnum, GameUpdatedEvent, PlayersUpdatedEvent } from './events';
 import type { Event } from './events';
 import { CommandTypeEnum } from './commands';
-import type { PingCommand, MovePlayerCommand, RevealAreaCommand, FlagAreaCommand } from './commands';
+import type { PingCommand, MovePlayerCommand, FlagAreaCommand } from './commands';
 import { GameAgg, PlayerAgg } from '@/models/aggregates';
 import { DirectionVo } from '@/models/valueObjects';
 // import { DirectionVo, PositionVo } from '@/models/valueObjects';
@@ -39,7 +39,6 @@ export default class GameSocket {
     socket.onmessage = async ({ data }: any) => {
       const newMsg: Event = JSON.parse(data);
 
-      console.log(newMsg);
       if (newMsg.type === EventTypeEnum.GameUpdated) {
         const [game] = parseGameUpdatedEvent(newMsg);
         params.onGameUpdated(game);
@@ -87,7 +86,6 @@ export default class GameSocket {
   }
 
   private async sendMessage(msg: object) {
-    console.log(msg);
     if (this.socket.readyState !== this.socket.OPEN) {
       return;
     }
@@ -105,13 +103,6 @@ export default class GameSocket {
     const command: MovePlayerCommand = {
       type: CommandTypeEnum.MovePlayer,
       direction: direction.toNumber(),
-    };
-    this.sendMessage(command);
-  }
-
-  public revealArea() {
-    const command: RevealAreaCommand = {
-      type: CommandTypeEnum.RevealArea,
     };
     this.sendMessage(command);
   }

@@ -24,15 +24,14 @@ const BASE_MODEL_SRC = '/bases/grass.gltf';
 const MOUND_MODEL_SRC = '/bases/mound.gltf';
 const ROOM_MODEL_SRC = '/bases/mini_room_art_copy.glb';
 const MINE_MODEL_SRC = '/bases/mine.gltf';
-const MOUNT_HEIGHT = 0.3;
+const FLAG_MODEL_SRC = '/bases/flag.gltf';
+const MOUNT_MODEL_HEIGHT = 0.3;
 const DIR_LIGHT_X_OFFSET = -10;
 const DIR_LIGHT_HEIGHT = 30;
 const DIR_LIGHT_Z_OFFSET = 50;
 const HEMI_LIGHT_HEIGHT = 20;
 
 function GameCanvas({ players, game, cameraCase }: Props) {
-  console.log(game, players);
-
   const wrapperRef = useRef<HTMLDivElement>(null);
   const wrapperDomRect = useDomRect(wrapperRef);
   const [scene] = useState<THREE.Scene>(() => {
@@ -43,7 +42,7 @@ function GameCanvas({ players, game, cameraCase }: Props) {
     hemiLight.position.set(0, HEMI_LIGHT_HEIGHT, 0);
     newScene.add(hemiLight);
 
-    const grid = new THREE.GridHelper(game.getSize().getWidth(), game.getSize().getHeight(), 0x000000, 0x000000);
+    const grid = new THREE.GridHelper(game.getSize().getWidth(), game.getSize().getWidth(), 0x000000, 0x000000);
     // @ts-ignore
     grid.material.opacity = 0.2;
     // @ts-ignore
@@ -95,6 +94,7 @@ function GameCanvas({ players, game, cameraCase }: Props) {
     loadModel(MOUND_MODEL_SRC);
     loadModel(ROOM_MODEL_SRC);
     loadModel(MINE_MODEL_SRC);
+    loadModel(FLAG_MODEL_SRC);
 
     range(8).map((count) => loadModel(getMineCountModelSrc(count + 1)));
   }, []);
@@ -140,7 +140,7 @@ function GameCanvas({ players, game, cameraCase }: Props) {
           camera.position.set(0, 40, 0);
           break;
         case 1:
-          camera.position.set(0, 15, gameSize.getHeight());
+          camera.position.set(0, 20, gameSize.getHeight());
           break;
         case 2:
           camera.position.set(0, 40, gameSize.getHeight() * 6 + 10);
@@ -160,6 +160,7 @@ function GameCanvas({ players, game, cameraCase }: Props) {
     function updateOnGameChange() {
       const [posOffsetX, posOffsetZ] = posOffset;
       const mountObjs: THREE.Group[] = [];
+      const flagObjs: THREE.Group[] = [];
       const mineObjs: THREE.Group[] = [];
       const mineCountObjs: THREE.Group[] = [];
       game.traverse((area, pos) => {
@@ -167,15 +168,23 @@ function GameCanvas({ players, game, cameraCase }: Props) {
           const mountObject = cloneModel(MOUND_MODEL_SRC);
           if (mountObject) {
             enableShadowOnObject(mountObject);
-            mountObject.position.set(posOffsetX + pos.getX() + 0.5, 0, posOffsetZ + pos.getZ() + 0.5);
+            mountObject.position.set(posOffsetX + pos.getX(), 0, posOffsetZ + pos.getZ());
             scene.add(mountObject);
             mountObjs.push(mountObject);
+          }
+
+          const flagObject = cloneModel(FLAG_MODEL_SRC);
+          if (flagObject && area.getFlagged()) {
+            enableShadowOnObject(flagObject);
+            flagObject.position.set(posOffsetX + pos.getX(), MOUNT_MODEL_HEIGHT, posOffsetZ + pos.getZ());
+            scene.add(flagObject);
+            flagObjs.push(flagObject);
           }
         } else if (area.getHasMine()) {
           const mineObject = cloneModel(MINE_MODEL_SRC);
           if (mineObject) {
             enableShadowOnObject(mineObject);
-            mineObject.position.set(posOffsetX + pos.getX() + 0.5, 0, posOffsetZ + pos.getZ() + 0.5);
+            mineObject.position.set(posOffsetX + pos.getX(), 0, posOffsetZ + pos.getZ());
             scene.add(mineObject);
             mineObjs.push(mineObject);
           }
@@ -183,7 +192,7 @@ function GameCanvas({ players, game, cameraCase }: Props) {
           const mineCountObject = cloneModel(getMineCountModelSrc(area.getAdjMinesCount()));
           if (mineCountObject) {
             enableShadowOnObject(mineCountObject);
-            mineCountObject.position.set(posOffsetX + pos.getX() + 0.5, 0, posOffsetZ + pos.getZ() + 0.5);
+            mineCountObject.position.set(posOffsetX + pos.getX(), 0, posOffsetZ + pos.getZ());
             scene.add(mineCountObject);
             mineCountObjs.push(mineCountObject);
           }
@@ -198,6 +207,9 @@ function GameCanvas({ players, game, cameraCase }: Props) {
           scene.remove(obj);
         });
         mineObjs.forEach((obj) => {
+          scene.remove(obj);
+        });
+        flagObjs.forEach((obj) => {
           scene.remove(obj);
         });
       };
@@ -266,11 +278,15 @@ function GameCanvas({ players, game, cameraCase }: Props) {
 
         if (playerObject) {
           const playerPos = player.getPosition();
-          const areaStood = game.getArea(playerPos);
+          let zPos = 0;
+          if (game.includePos(playerPos)) {
+            const areaStood = game.getArea(playerPos);
+            zPos = areaStood.getRevealed() ? 0 : MOUNT_MODEL_HEIGHT;
+          }
           playerObject.position.set(
-            posOffsetX + player.getPosition().getX() + 0.5,
-            areaStood.getRevealed() ? 0 : MOUNT_HEIGHT,
-            posOffsetZ + player.getPosition().getZ() + 0.5
+            posOffsetX + player.getPosition().getX(),
+            zPos,
+            posOffsetZ + player.getPosition().getZ()
           );
           playerObject.rotation.y = Math.PI - (player.getDirection().toNumber() * Math.PI) / 2;
         }
