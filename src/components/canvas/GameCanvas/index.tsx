@@ -81,6 +81,7 @@ function GameCanvas({ players, myPlayer, game }: Props) {
     newRenderer.shadowMap.type = THREE.PCFSoftShadowMap;
     return newRenderer;
   });
+  const [characterColor] = useState(() => Math.random() * 0xffffff);
   const { loadModel, cloneModel } = useContext(ThreeJsContext);
 
   useEffect(() => {
@@ -325,7 +326,8 @@ function GameCanvas({ players, myPlayer, game }: Props) {
             // for all mesh objects in grassObject
             if (obj.type === 'Mesh') {
               if (obj.name === 'head') {
-                obj.material.color.setHex(Math.random() * 0xffffff);
+                // @ts-ignore
+                obj.material.color.setHex(characterColor);
               }
             }
           });
