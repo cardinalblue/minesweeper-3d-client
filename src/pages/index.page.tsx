@@ -21,6 +21,7 @@ const Landing: NextPage = function Landing() {
   const styleContext = useContext(StyleContext);
   const router = useRouter();
   const [playerName, setPlayerName] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const { gameStatus, joinGame } = useContext(GameContext);
 
@@ -35,6 +36,7 @@ const Landing: NextPage = function Landing() {
       alert('Common! Put your name!');
       return;
     }
+    setLoading(true);
     joinGame('dc3e3d8c-da82-4e15-8263-49c178f57bff', playerName);
   };
 
@@ -65,7 +67,7 @@ const Landing: NextPage = function Landing() {
           <Input value={playerName} onInput={setPlayerName} />
         </div>
         <div className="mt-15 ml-[-280px] flex justify-center">
-          <Button copy="Start" onClick={onStartClick} />
+          <Button copy={loading ? 'loading...' : 'Start'} onClick={onStartClick} />
         </div>
       </div>
     </main>
