@@ -7,6 +7,8 @@ import StyleContext from '@/contexts/StyleContext';
 import GameCanvas from '@/components/canvas/GameCanvas';
 import useKeyPress from '@/hooks/useKeyPress';
 import HotkeyModal from '@/components/modal/HotkeyModal';
+import SubscribeModal from '@/components/modal/SubscribeModal';
+import Button from '@/components/button/Button';
 
 const Room: NextPage = function Room() {
   const router = useRouter();
@@ -25,6 +27,7 @@ const Room: NextPage = function Room() {
   } = useContext(GameContext);
 
   const [displayHotkeyModal, setDisplayHotkeyModal] = useState(true);
+  const [displaySubscribeModal, setDisplaySubscribeModal] = useState(false);
 
   useEffect(() => {
     if (gameStatus !== 'OPEN') {
@@ -81,10 +84,16 @@ const Room: NextPage = function Room() {
 
   return (
     <main
-      className="w-screen h-screen flex"
+      className="relative w-screen h-screen flex"
       style={{ width: styleContext.windowWidth, height: styleContext.windowHeight }}
     >
+      {!displaySubscribeModal && (
+        <div className="absolute top-2 left-2 z-10">
+          <Button copy="Let AI PLAY!" onClick={() => setDisplaySubscribeModal(true)} />
+        </div>
+      )}
       <HotkeyModal opened={displayHotkeyModal} />
+      <SubscribeModal opened={displaySubscribeModal} onClose={() => setDisplaySubscribeModal(false)} />
       {game && players && myPlayer && <GameCanvas game={game} players={players} myPlayer={myPlayer} />}
     </main>
   );

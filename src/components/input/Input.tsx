@@ -42,7 +42,7 @@ function Input({ value, onInput }: Props) {
   return (
     <div className="flex flex-col">
       <input
-        className="outline-none bg-transparent pl-4 py-2 text-4xl font-silkscreen"
+        className="outline-none bg-transparent py-2 text-4xl font-silkscreen"
         placeholder="Your name please"
         value={value}
         onInput={handleInput}

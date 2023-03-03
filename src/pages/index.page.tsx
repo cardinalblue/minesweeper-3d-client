@@ -60,10 +60,11 @@ const Landing: NextPage = function Landing() {
       <OrangeBlock bottom={90} right={0} />
       <div className="flex flex-col justify-center">
         <TextLogo />
-        <div className="mt-5">
+        <div className="mt-5 ml-[-40px] flex items-center">
+          <img src="/dog.png" alt="hi" />
           <Input value={playerName} onInput={setPlayerName} />
         </div>
-        <div className="mt-20 flex justify-center">
+        <div className="mt-15 ml-[-280px] flex justify-center">
           <Button copy="Start" onClick={onStartClick} />
         </div>
       </div>

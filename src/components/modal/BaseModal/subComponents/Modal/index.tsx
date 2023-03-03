@@ -7,7 +7,7 @@ type ModalProps = {
 export default function Modal({ width, height, children }: ModalProps) {
   return (
     <section
-      className="overflow-hidden bg-[#ffffff66] rounded-3xl"
+      className="overflow-hidden bg-[#ffffffbb] rounded-3xl"
       style={{
         width,
         height,
