@@ -320,6 +320,16 @@ function GameCanvas({ players, myPlayer, game }: Props) {
           playerObject.position.set(boardOffsetX + playerPos.getX(), 0, boardOffsetZ + playerPos.getZ());
           playerObject.rotation.y = Math.PI - (player.getDirection().toNumber() * Math.PI) / 2;
 
+          console.log(playerObject);
+          playerObject.traverse(function (obj) {
+            // for all mesh objects in grassObject
+            if (obj.type === 'Mesh') {
+              if (obj.name === 'head') {
+                obj.material.color.setHex(Math.random() * 0xffffff);
+              }
+            }
+          });
+
           if (player.getGuilty()) {
             playerObject.position.setY(5.5);
             playerObject.translateZ(4);
