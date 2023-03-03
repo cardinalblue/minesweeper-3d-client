@@ -17,7 +17,7 @@ const getMineCountModelSrc = (mineCount: number) => `/mine_count/${mineCount}.gl
 const CHARACTER_MODEL_SRC = '/characters/robot.gltf';
 const BASE_MODEL_SRC = '/bases/grass.gltf';
 const MOUND_MODEL_SRC = '/bases/mound.gltf';
-const ROOM_MODEL_SRC = '/bases/mini_room_art_copy.glb';
+const ROOM_MODEL_SRC = '/bases/mini_room_pic_v1.glb';
 const MINE_MODEL_SRC = '/bases/mine.gltf';
 const FLAG_MODEL_SRC = '/bases/flag.gltf';
 const BOOM_MODEL_SRC = '/bases/boom.gltf';
