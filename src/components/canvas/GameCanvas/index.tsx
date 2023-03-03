@@ -14,7 +14,7 @@ type Props = {
 };
 
 const getMineCountModelSrc = (mineCount: number) => `/mine_count/${mineCount}.gltf`;
-const CHARACTER_MODEL_SRC = '/characters/robot.gltf';
+const CHARACTER_MODEL_SRC = '/characters/robot.glb';
 const BASE_MODEL_SRC = '/bases/grass.gltf';
 const MOUND_MODEL_SRC = '/bases/mound.gltf';
 const ROOM_MODEL_SRC = '/bases/mini_room_pic_v1.glb';
