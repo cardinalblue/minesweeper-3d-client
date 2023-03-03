@@ -11,13 +11,15 @@ const Room: NextPage = function Room() {
   const router = useRouter();
   const gameId = router.query.id as string;
   const styleContext = useContext(StyleContext);
-  const { game, players, myPlayer, joinGame, movePlayer, flagArea, changeCamera, resetGame } = useContext(GameContext);
+  const { game, players, myPlayer, joinGame, movePlayer, revivePlayer, flagArea, changeCamera, resetGame } =
+    useContext(GameContext);
 
   useEffect(() => {
     if (!gameId) return;
     joinGame(gameId);
   }, [gameId]);
 
+  useKeyPress('KeyR', { onKeyDown: revivePlayer });
   useKeyPress('KeyP', { onKeyDown: resetGame });
   useKeyPress('KeyF', { onKeyDown: flagArea });
   useKeyPress('KeyC', { onKeyDown: changeCamera });

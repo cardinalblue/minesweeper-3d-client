@@ -5,6 +5,7 @@ import { CommandTypeEnum } from './commands';
 import type {
   PingCommand,
   MovePlayerCommand,
+  RevivePlayerCommand,
   FlagAreaCommand,
   ChangeCameraCommand,
   ResetGameCommand,
@@ -109,6 +110,13 @@ export default class GameSocket {
     const command: MovePlayerCommand = {
       type: CommandTypeEnum.MovePlayer,
       direction: direction.toNumber(),
+    };
+    this.sendMessage(command);
+  }
+
+  public revivePlayer() {
+    const command: RevivePlayerCommand = {
+      type: CommandTypeEnum.RevivePlayer,
     };
     this.sendMessage(command);
   }

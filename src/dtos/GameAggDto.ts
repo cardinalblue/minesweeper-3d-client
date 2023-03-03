@@ -9,7 +9,7 @@ type GameAggDto = {
   size: SizeVoDto;
   minesCount: number;
   areas: AreaVoDto[][];
-  camera: 0 | 1 | 2 | 3 | 4;
+  camera: 0 | 1 | 2 | 3 | 4 | 5;
 };
 
 export function parseGameAggDto(dto: GameAggDto): GameAgg {

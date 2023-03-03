@@ -12,6 +12,7 @@ type ContextValue = {
   game: GameAgg | null;
   joinGame: (gameId: string) => void;
   movePlayer: (direction: DirectionVo) => void;
+  revivePlayer: () => void;
   flagArea: () => void;
   changeCamera: () => void;
   leaveGame: () => void;
@@ -26,6 +27,7 @@ function createInitialContextValue(): ContextValue {
     game: null,
     joinGame: () => {},
     movePlayer: () => {},
+    revivePlayer: () => {},
     flagArea: () => {},
     changeCamera: () => {},
     leaveGame: () => {},
@@ -103,6 +105,10 @@ export function Provider({ children }: Props) {
     [gameSocket]
   );
 
+  const revivePlayer = useCallback(() => {
+    gameSocket?.revivePlayer();
+  }, [gameSocket]);
+
   const leaveGame = useCallback(() => {
     setGameStatus('DISCONNECTING');
     gameSocket?.disconnect();
@@ -130,12 +136,25 @@ export function Provider({ children }: Props) {
           game,
           joinGame,
           movePlayer,
+          revivePlayer,
           leaveGame,
           flagArea,
           changeCamera,
           resetGame,
         }),
-        [gameStatus, myPlayer, players, game, joinGame, movePlayer, leaveGame, flagArea, changeCamera, resetGame]
+        [
+          gameStatus,
+          myPlayer,
+          players,
+          game,
+          joinGame,
+          movePlayer,
+          revivePlayer,
+          leaveGame,
+          flagArea,
+          changeCamera,
+          resetGame,
+        ]
       )}
     >
       {children}

@@ -171,6 +171,10 @@ function GameCanvas({ players, myPlayer, game }: Props) {
               break;
           }
           break;
+        case 5:
+          camera.position.set(10, 5, -12);
+          camera.lookAt(-3, 4, -30);
+          break;
         default:
           break;
       }

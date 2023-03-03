@@ -9,9 +9,9 @@ export default class GameAgg {
 
   private areas: AreaVo[][];
 
-  private camera: 0 | 1 | 2 | 3 | 4;
+  private camera: 0 | 1 | 2 | 3 | 4 | 5;
 
-  constructor(id: string, size: SizeVo, minesCount: number, areas: AreaVo[][], camera: 0 | 1 | 2 | 3 | 4) {
+  constructor(id: string, size: SizeVo, minesCount: number, areas: AreaVo[][], camera: 0 | 1 | 2 | 3 | 4 | 5) {
     this.id = id;
     this.size = size;
     this.minesCount = minesCount;
@@ -19,7 +19,7 @@ export default class GameAgg {
     this.camera = camera;
   }
 
-  static new(id: string, size: SizeVo, minesCount: number, areas: AreaVo[][], camera: 0 | 1 | 2 | 3 | 4): GameAgg {
+  static new(id: string, size: SizeVo, minesCount: number, areas: AreaVo[][], camera: 0 | 1 | 2 | 3 | 4 | 5): GameAgg {
     return new GameAgg(id, size, minesCount, areas, camera);
   }
 
