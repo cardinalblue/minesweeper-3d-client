@@ -44,6 +44,9 @@ function HotkeyModal({ opened, onClose = () => {} }: Props) {
           <Block keyCode="Q" copy="Turn on/off this hint popup" />
         </div>
         <div className="mt-3 w-full">
+          <Block keyCode="Esc" copy="Leave game" />
+        </div>
+        <div className="mt-3 w-full">
           <Block keyCode="W" copy="Let your character go foward to where it's facing" />
         </div>
         <div className="mt-3 w-full">

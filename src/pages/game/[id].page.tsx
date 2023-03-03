@@ -10,17 +10,27 @@ import HotkeyModal from '@/components/modal/HotkeyModal';
 
 const Room: NextPage = function Room() {
   const router = useRouter();
-  const gameId = router.query.id as string;
   const styleContext = useContext(StyleContext);
-  const { game, players, myPlayer, joinGame, movePlayer, revivePlayer, flagArea, changeCamera, resetGame } =
-    useContext(GameContext);
+  const {
+    game,
+    gameStatus,
+    players,
+    myPlayer,
+    leaveGame,
+    movePlayer,
+    revivePlayer,
+    flagArea,
+    changeCamera,
+    resetGame,
+  } = useContext(GameContext);
 
   const [displayHotkeyModal, setDisplayHotkeyModal] = useState(true);
 
   useEffect(() => {
-    if (!gameId) return;
-    joinGame(gameId);
-  }, [gameId]);
+    if (gameStatus !== 'OPEN') {
+      router.push('/');
+    }
+  }, [gameStatus]);
 
   useKeyPress('KeyQ', {
     onKeyDown: () => {
@@ -31,6 +41,11 @@ const Room: NextPage = function Room() {
   useKeyPress('KeyP', { onKeyDown: resetGame });
   useKeyPress('KeyF', { onKeyDown: flagArea });
   useKeyPress('KeyC', { onKeyDown: changeCamera });
+  useKeyPress('Escape', {
+    onKeyDown: () => {
+      leaveGame();
+    },
+  });
 
   const isUpPressed = useKeyPress('KeyW');
   const isRightPressed = useKeyPress('KeyD');
@@ -64,16 +79,12 @@ const Room: NextPage = function Room() {
     [isUpPressed, isRightPressed, isDownPressed, isLeftPressed, movePlayer]
   );
 
-  const onHotkeyModalConfirm = () => {
-    setDisplayHotkeyModal(false);
-  };
-
   return (
     <main
       className="w-screen h-screen flex"
       style={{ width: styleContext.windowWidth, height: styleContext.windowHeight }}
     >
-      <HotkeyModal opened={displayHotkeyModal} onClose={onHotkeyModalConfirm} />
+      <HotkeyModal opened={displayHotkeyModal} />
       {game && players && myPlayer && <GameCanvas game={game} players={players} myPlayer={myPlayer} />}
     </main>
   );

@@ -1,4 +1,8 @@
 import { createContext, useCallback, useState, useMemo } from 'react';
+
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 import GameSocket from '@/apis/GameSocket';
 import { DirectionVo } from '@/models/valueObjects';
 import { PlayerAgg, GameAgg } from '@/models/aggregates';
@@ -10,7 +14,7 @@ type ContextValue = {
   myPlayer: PlayerAgg | null;
   players: PlayerAgg[] | null;
   game: GameAgg | null;
-  joinGame: (gameId: string) => void;
+  joinGame: (gameId: string, name: string) => void;
   movePlayer: (direction: DirectionVo) => void;
   revivePlayer: () => void;
   flagArea: () => void;
@@ -64,13 +68,16 @@ export function Provider({ children }: Props) {
   }, []);
 
   const joinGame = useCallback(
-    (gameId: string) => {
+    (gameId: string, playerName: string) => {
       const hasUncleanedConnection = !!gameSocket;
       if (hasUncleanedConnection) {
         return;
       }
 
-      const newGameSocket = GameSocket.newGameSocket(gameId, {
+      const newGameSocket = GameSocket.newGameSocket(gameId, playerName, {
+        onNotificationSent: (message: string) => {
+          toast(message);
+        },
         onGameUpdated: (newGame: GameAgg) => {
           setGame(newGame);
         },
@@ -157,6 +164,18 @@ export function Provider({ children }: Props) {
         ]
       )}
     >
+      <ToastContainer
+        position="top-right"
+        autoClose={200}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="colored"
+      />
       {children}
     </Context.Provider>
   );

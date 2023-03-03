@@ -30,7 +30,9 @@ export default class GameSocket {
 
   constructor(
     gameId: string,
+    playerName: string,
     params: {
+      onNotificationSent: (msg: string) => void;
       onGameUpdated: (game: GameAgg) => void;
       onPlayersUpdated: (myPlayerId: string, players: PlayerAgg[]) => void;
       onClose: (disconnectedByClient: boolean) => void;
@@ -38,7 +40,7 @@ export default class GameSocket {
     }
   ) {
     const schema = process.env.NODE_ENV === 'production' ? 'wss' : 'ws';
-    const socketUrl = `${schema}://${process.env.API_DOMAIN}/game-client/${gameId}`;
+    const socketUrl = `${schema}://${process.env.API_DOMAIN}/game-client/${gameId}?playerName=${playerName}`;
     const socket = new WebSocket(socketUrl);
 
     let pingServerInterval: NodeJS.Timer | null = null;
@@ -52,6 +54,8 @@ export default class GameSocket {
       } else if (newMsg.type === EventTypeEnum.PlayersUpdated) {
         const [myPlayerId, players] = parsePlayersUpdatedEvent(newMsg);
         params.onPlayersUpdated(myPlayerId, players);
+      } else if (newMsg.type === EventTypeEnum.NotificationSent) {
+        params.onNotificationSent(newMsg.message);
       }
     };
 
@@ -77,14 +81,16 @@ export default class GameSocket {
 
   static newGameSocket(
     gameId: string,
+    playerName: string,
     params: {
+      onNotificationSent: (msg: string) => void;
       onGameUpdated: (game: GameAgg) => void;
       onPlayersUpdated: (myPlayerId: string, players: PlayerAgg[]) => void;
       onClose: (disconnectedByClient: boolean) => void;
       onOpen: () => void;
     }
   ): GameSocket {
-    return new GameSocket(gameId, params);
+    return new GameSocket(gameId, playerName, params);
   }
 
   public disconnect() {

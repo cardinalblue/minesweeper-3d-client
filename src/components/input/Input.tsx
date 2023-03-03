@@ -1,5 +1,8 @@
+import type { FormEvent } from 'react';
+
 type Props = {
   value: string;
+  onInput: (val: string) => void;
 };
 
 function LightBrick() {
@@ -30,13 +33,19 @@ function TransparentBrick() {
   return <div className="w-[53px] h-3" />;
 }
 
-function Input({ value }: Props) {
+function Input({ value, onInput }: Props) {
+  const handleInput = (e: FormEvent<HTMLInputElement>) => {
+    // @ts-ignore
+    const newVal = e.target.value as string;
+    onInput(newVal);
+  };
   return (
     <div className="flex flex-col">
       <input
         className="outline-none bg-transparent pl-4 py-2 text-4xl font-silkscreen"
         placeholder="Your name please"
         value={value}
+        onInput={handleInput}
       />
       <div className="flex">
         <LightBrick />

@@ -1,4 +1,4 @@
-import { useContext } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import type { NextPage } from 'next';
 import { useRouter } from 'next/router';
 
@@ -6,6 +6,7 @@ import StyleContext from '@/contexts/StyleContext';
 import TextLogo from '@/components/svg/TextLogo';
 import Button from '@/components/button/Button';
 import Input from '@/components/input/Input';
+import GameContext from '@/contexts/GameContext';
 
 function OrangeBlock({ top, right, left, bottom }: { top?: number; right?: number; bottom?: number; left?: number }) {
   return (
@@ -19,9 +20,22 @@ function OrangeBlock({ top, right, left, bottom }: { top?: number; right?: numbe
 const Landing: NextPage = function Landing() {
   const styleContext = useContext(StyleContext);
   const router = useRouter();
+  const [playerName, setPlayerName] = useState('');
+
+  const { gameStatus, joinGame } = useContext(GameContext);
+
+  useEffect(() => {
+    if (gameStatus === 'OPEN') {
+      router.push('/game/dc3e3d8c-da82-4e15-8263-49c178f57bff');
+    }
+  }, [gameStatus]);
 
   const onStartClick = () => {
-    router.push('/game/dc3e3d8c-da82-4e15-8263-49c178f57bff');
+    if (!playerName) {
+      alert('Common! Put your name!');
+      return;
+    }
+    joinGame('dc3e3d8c-da82-4e15-8263-49c178f57bff', playerName);
   };
 
   return (
@@ -47,7 +61,7 @@ const Landing: NextPage = function Landing() {
       <div className="flex flex-col justify-center">
         <TextLogo />
         <div className="mt-5">
-          <Input value="hi" />
+          <Input value={playerName} onInput={setPlayerName} />
         </div>
         <div className="mt-20 flex justify-center">
           <Button copy="Start" onClick={onStartClick} />
