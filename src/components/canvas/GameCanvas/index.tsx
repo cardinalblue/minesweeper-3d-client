@@ -324,9 +324,9 @@ function GameCanvas({ players, myPlayer, game }: Props) {
           playerObject.traverse(function (obj) {
             // for all mesh objects in grassObject
             if (obj.type === 'Mesh') {
-              // @ts-ignore
-              console.log(obj);
-              // obj.material.color = new THREE.Color('#FFCCB7');
+              if (obj.name === 'head') {
+                obj.material.color.setHex(Math.random() * 0xffffff);
+              }
             }
           });
 
