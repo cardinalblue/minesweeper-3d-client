@@ -8,6 +8,7 @@ module.exports = {
       },
       fontFamily: {
         silkscreen: ['Silkscreen', 'cursive'],
+        handjet: ['Handjet', 'sans-serif'],
       },
     },
   },

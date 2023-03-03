@@ -191,6 +191,12 @@ function GameCanvas({ players, myPlayer, game }: Props) {
           const mountObject = cloneModel(MOUND_MODEL_SRC);
           if (mountObject) {
             enableShadowOnObject(mountObject);
+            mountObject.traverse(function (obj) {
+              if (obj.type === 'Mesh') {
+                // @ts-ignore
+                obj.material.color = new THREE.Color('#DF9C5D');
+              }
+            });
             mountObject.position.set(boardOffsetX + pos.getX(), 0, boardOffsetZ + pos.getZ());
             scene.add(mountObject);
             mountObjs.push(mountObject);
@@ -266,7 +272,7 @@ function GameCanvas({ players, myPlayer, game }: Props) {
         // for all mesh objects in grassObject
         if (obj.type === 'Mesh') {
           // @ts-ignore
-          obj.material.color = new THREE.Color('rgb(225, 215, 255)');
+          obj.material.color = new THREE.Color('#FFCCB7');
         }
       });
       scene.add(grassObject);
